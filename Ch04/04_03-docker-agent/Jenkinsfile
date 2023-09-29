@@ -1,24 +1,14 @@
 pipeline {
-    agent { label 'jenkins-slave-label' } // Specify the label of your EC2 agent here
+    agent {
+        docker { image 'public.ecr.aws/docker/library/maven:3.9-sapmachine' }
+    }
     stages {
-        stage('Docker Build and Run') {
+        stage('Source') {
             steps {
-                script {
-                    def dockerImage = 'maven:3.8.4-jdk-11'
-                    
-                    // Pull the Docker image on the EC2 agent
-                    sh "docker pull $dockerImage"
-                    
-                    // Install Maven inside the Docker container
-                    sh "docker run --rm --user root -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage apt-get update && apt-get install -y maven"
-                    
-                    // Verify Maven installation
-                    sh "docker run --rm --user root -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage mvn --version"
-                    sh "docker run --rm --user root -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage git --version"
-                    
-                    git branch: 'main',
-                        url: 'https://github.com/LinkedInLearning/essential-jenkins-2468076.git'
-                }
+                sh 'mvn --version'
+                sh 'git --version'
+                git branch: 'main',
+                    url: 'https://github.com/LinkedInLearning/essential-jenkins-2468076.git'
             }
         }
         stage('Clean') {
