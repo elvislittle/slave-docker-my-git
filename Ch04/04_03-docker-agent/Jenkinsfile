@@ -10,7 +10,7 @@ pipeline {
                     sh "docker pull $dockerImage"
                     
                     // Install Maven inside the Docker container
-                    sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage apt-get update && apt-get install -y maven"
+                    sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage sudo apt-get update && sudo apt-get install -y maven"
                     
                     // Verify Maven installation
                     sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage mvn --version"
