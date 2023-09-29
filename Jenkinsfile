@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        agent { label 'jenkins-slave-label' } // Specify the label of your EC2 agent here
-    }
+    agent { label 'jenkins-slave-label' } // Specify the label of your EC2 agent here
     stages {
         stage('Docker Build and Run') {
             steps {
