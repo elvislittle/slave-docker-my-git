@@ -4,7 +4,7 @@ pipeline {
         stage('Docker Build and Run') {
             steps {
                 script {
-                    def dockerImage = 'public.ecr.aws/docker/library/maven:3.9-sapmachine'
+                    def dockerImage = 'maven:3.8.4-jdk-11'
                     
                     // Pull the Docker image on the EC2 agent
                     sh "docker pull $dockerImage"
