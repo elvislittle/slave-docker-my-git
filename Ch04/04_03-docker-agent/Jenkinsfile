@@ -4,14 +4,16 @@ pipeline {
         stage('Docker Build and Run') {
             steps {
                 script {
-                    def dockerImage = 'public.ecr.aws/docker/library/maven:3.9-sapmachine'
-            
-                    // Pull the Docker image
+                    def dockerImage = 'maven:3.8.4-jdk-11'
+                    
+                    // Pull the Docker image on the EC2 agent
                     sh "docker pull $dockerImage"
-            
-                    // Run a Maven installation script inside the container
-                    sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage bash -c 'apt-get update && apt-get install -y maven && mvn --version'"
+                    
+                    // Run your pipeline inside a Docker container on the EC2 agent
+                    sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage mvn --version"
                     sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage git --version"
+                    git branch: 'main',
+                        url: 'https://github.com/LinkedInLearning/essential-jenkins-2468076.git'
                 }
             }
         }
