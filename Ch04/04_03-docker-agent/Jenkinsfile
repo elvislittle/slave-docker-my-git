@@ -9,9 +9,13 @@ pipeline {
                     // Pull the Docker image on the EC2 agent
                     sh "docker pull $dockerImage"
                     
-                    // Run your pipeline inside a Docker container on the EC2 agent
+                    // Install Maven inside the Docker container
+                    sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage apt-get update && apt-get install -y maven"
+                    
+                    // Verify Maven installation
                     sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage mvn --version"
                     sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace $dockerImage git --version"
+                    
                     git branch: 'main',
                         url: 'https://github.com/LinkedInLearning/essential-jenkins-2468076.git'
                 }
