@@ -22,7 +22,7 @@ pipeline {
                 sh 'mvn --version'
                 sh 'git --version'
                 git branch: 'main',
-                    url: 'https://github.com/elvislittle/master-docker-agent.git'
+                    url: 'https://github.com/elvislittle/slave-docker-my-git.git'
             }
         }
         stage('Clean') {
