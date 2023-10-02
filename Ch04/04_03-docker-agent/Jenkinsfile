@@ -19,44 +19,48 @@ pipeline {
                 }
             }
         }
-            stage('Source') {
-                steps {
-                    script {
-                        // Execute commands inside the existing Docker container
-                        sh "docker exec -it ${env.CONTAINER_ID} mvn --version"
-                        sh "docker exec -it ${env.CONTAINER_ID} git --version"
+        
+        stage('Source') {
+            steps {
+                script {
+                    // Execute commands inside the existing Docker container
+                    sh "docker exec -it ${env.CONTAINER_ID} mvn --version"
+                    sh "docker exec -it ${env.CONTAINER_ID} git --version"
 
-                        // Clone the repository inside the existing Docker container
-                        git branch: 'main',
-                            url: 'https://github.com/elvislittle/slave-docker-my-git.git'
-                    }
-                }
-            }
-            stage('Clean') {
-                steps {
-                    script {
-                        // Run Maven clean command inside the existing Docker container
-                        sh "docker exec -it ${env.CONTAINER_ID} mvn clean"
-                    }
-                }
-            }
-            stage('Test') {
-                steps {
-                    script {
-                        // Run Maven test command inside the existing Docker container
-                        sh "docker exec -it ${env.CONTAINER_ID} mvn test"
-                    }
-                }
-            }
-            stage('Package') {
-                steps {
-                    script {
-                        // Run Maven package command inside the existing Docker container
-                        sh "docker exec -it ${env.CONTAINER_ID} mvn package -DskipTests"
-                    }
+                    // Clone the repository inside the existing Docker container
+                    git branch: 'main',
+                        url: 'https://github.com/elvislittle/slave-docker-my-git.git'
                 }
             }
         }
+        
+        stage('Clean') {
+            steps {
+                script {
+                    // Run Maven clean command inside the existing Docker container
+                    sh "docker exec -it ${env.CONTAINER_ID} mvn clean"
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                script {
+                    // Run Maven test command inside the existing Docker container
+                    sh "docker exec -it ${env.CONTAINER_ID} mvn test"
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                script {
+                    // Run Maven package command inside the existing Docker container
+                    sh "docker exec -it ${env.CONTAINER_ID} mvn package -DskipTests"
+                }
+            }
+        }
+        
         stage('Clean Up') {
             steps {
                 script {
@@ -67,3 +71,4 @@ pipeline {
             }
         }
     }
+}
