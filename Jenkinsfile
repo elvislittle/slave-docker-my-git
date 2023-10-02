@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'jenkins-slave-label' }
+    agent { label 'linux' }
     stages {
         stage('Run on Slave') {
             steps {
