@@ -14,6 +14,10 @@ pipeline {
                     sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace ${dockerImage} git --version"
 echo 'all seems good for the moment'
                     // Continue with your other pipeline steps
+                    sh 'mvn --version'
+                sh 'git --version'
+                git branch: 'main',
+                    url: 'https://github.com/elvislittle/slave-docker-my-git.git'
                 }
             }
         }
