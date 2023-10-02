@@ -12,37 +12,58 @@ pipeline {
                     // Run Maven and Git commands inside the Docker container
                     sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace ${dockerImage} mvn --version"
                     sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace ${dockerImage} git --version"
-                    
-echo 'all seems good for the moment'
-sh 'env' // Print environment variables
-sh 'echo $PATH' // Print the PATH variable
+
+                    // Save the container ID for later stages to reuse
+                    def containerId = sh(returnStatus: true, script: "docker run -d -v ${env.WORKSPACE}:/workspace -w /workspace ${dockerImage} sleep infinity")
+                    env.CONTAINER_ID = containerId.trim()
                 }
             }
         }
-        stage('Source') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/elvislittle/slave-docker-my-git.git'
+        stages {
+            stage('Source') {
+                steps {
+                    script {
+                        // Execute commands inside the existing Docker container
+                        sh "docker exec -it ${env.CONTAINER_ID} mvn --version"
+                        sh "docker exec -it ${env.CONTAINER_ID} git --version"
+
+                        // Clone the repository inside the existing Docker container
+                        git branch: 'main',
+                            url: 'https://github.com/elvislittle/slave-docker-my-git.git'
+                    }
+                }
             }
-        }
-        stage('Clean') {
-            steps {
-                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
-                    sh 'mvn clean'
+            stage('Clean') {
+                steps {
+                    script {
+                        // Run Maven clean command inside the existing Docker container
+                        sh "docker exec -it ${env.CONTAINER_ID} mvn clean"
+                    }
+                }
+            }
+            stage('Test') {
+                steps {
+                    script {
+                        // Run Maven test command inside the existing Docker container
+                        sh "docker exec -it ${env.CONTAINER_ID} mvn test"
+                    }
+                }
+            }
+            stage('Package') {
+                steps {
+                    script {
+                        // Run Maven package command inside the existing Docker container
+                        sh "docker exec -it ${env.CONTAINER_ID} mvn package -DskipTests"
+                    }
                 }
             }
         }
-        stage('Test') {
+        stage('Clean Up') {
             steps {
-                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
-                    sh 'mvn test'
-                }
-            }
-        }
-        stage('Package') {
-            steps {
-                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
-                    sh 'mvn package -DskipTests'
+                script {
+                    // Stop and remove the Docker container after all stages
+                    sh "docker stop ${env.CONTAINER_ID}"
+                    sh "docker rm ${env.CONTAINER_ID}"
                 }
             }
         }
