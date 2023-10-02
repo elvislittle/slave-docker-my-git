@@ -1,72 +1,40 @@
-pipeline {
-    agent { label 'linux' }
-    stages {
-        stage('Run on Slave') {
-            steps {
-                script {
-                    def dockerImage = 'public.ecr.aws/docker/library/maven:3.9-sapmachine'
-
-                    // Pull the Docker image
-                    sh "docker pull ${dockerImage}"
-
-                    // Run Maven and Git commands inside the Docker container
-                    sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace ${dockerImage} mvn --version"
-                    sh "docker run --rm -v ${env.WORKSPACE}:/workspace -w /workspace ${dockerImage} git --version"
-
-                    // Save the container ID for later stages to reuse
-                    def containerId = sh(returnStatus: true, script: "docker run -d -v ${env.WORKSPACE}:/workspace -w /workspace ${dockerImage} sleep infinity")
-                    env.CONTAINER_ID = containerId.trim()
-                }
-            }
+pipeline {                           // We are using a declarative pipeline
+    agent {                          // We want to use an agent/node
+        docker {                     // We want to use docker for this
+            image 'public.ecr.aws/docker/library/maven:3.9-sapmachine'           // The docker image to run in
+            label 'linux'  // Use a node/agent with these labels
+            args '-u root:sudo'      // Add this to be root in the container
         }
-        
+    }
+    
+    stages {
         stage('Source') {
             steps {
-                script {
-                    // Execute commands inside the existing Docker container
-                    sh "docker exec -it ${env.CONTAINER_ID} mvn --version"
-                    sh "docker exec -it ${env.CONTAINER_ID} git --version"
-
-                    // Clone the repository inside the existing Docker container
-                    git branch: 'main',
-                        url: 'https://github.com/elvislittle/slave-docker-my-git.git'
-                }
+                sh 'mvn --version'
+                sh 'git --version'
+                git branch: 'main',
+                    url: 'https://github.com/LinkedInLearning/essential-jenkins-2468076.git'
             }
         }
         
         stage('Clean') {
             steps {
-                script {
-                    // Run Maven clean command inside the existing Docker container
-                    sh "docker exec -it ${env.CONTAINER_ID} mvn clean"
+                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
+                    sh 'mvn clean'
                 }
             }
         }
-        
         stage('Test') {
             steps {
-                script {
-                    // Run Maven test command inside the existing Docker container
-                    sh "docker exec -it ${env.CONTAINER_ID} mvn test"
+                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
+                    sh 'mvn test'
                 }
             }
         }
-        
         stage('Package') {
             steps {
-                script {
-                    // Run Maven package command inside the existing Docker container
-                    sh "docker exec -it ${env.CONTAINER_ID} mvn package -DskipTests"
-                }
-            }
-        }
-        
-        stage('Clean Up') {
-            steps {
-                script {
-                    // Stop and remove the Docker container after all stages
-                    sh "docker stop ${env.CONTAINER_ID}"
-                    sh "docker rm ${env.CONTAINER_ID}"
+                dir("${env.WORKSPACE}/Ch04/04_03-docker-agent"){
+                    sh 'mvn package -DskipTests'
                 }
             }
         }
