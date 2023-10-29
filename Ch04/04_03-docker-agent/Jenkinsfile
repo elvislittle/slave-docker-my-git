@@ -3,9 +3,16 @@ pipeline {                                                                      
         docker {                                                                 // We want to use docker for this
             image 'public.ecr.aws/docker/library/maven:3.9-sapmachine'           // The docker image to run in
             label 'jenkins-slave'                                                // Use a node/agent with these labels
-            args '-u root'                                                  // Add this to be root in the container
+            args '-u root:sudo'                                                  // Add this to be root in the container
         }
     }
+
+    stage('Debug') { // Add this debugging stage
+            steps {
+                sh 'docker run -it --rm public.ecr.aws/docker/library/maven:3.9-sapmachine /bin/bash'
+            }
+        }
+    
     stages {
         stage('Source') {
             steps {
