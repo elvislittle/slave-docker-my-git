@@ -8,11 +8,14 @@ pipeline {                                                                      
     }
         stages {
         
-        stage('Debug') { // Add this debugging stage
+       stage('Debug Environment') {
             steps {
-                sh 'docker run -it --rm public.ecr.aws/docker/library/maven:3.9-sapmachine /bin/bash'
+                sh 'whoami'
+                sh 'groups'
+                sh 'ls -l /var/run/docker.sock'
+                sh 'docker --version'
             }
-        }    
+        } 
         
         stage('Source') {
             steps {
