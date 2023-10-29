@@ -6,14 +6,14 @@ pipeline {                                                                      
             args '-u root:sudo'                                                  // Add this to be root in the container
         }
     }
-
-    stage('Debug') { // Add this debugging stage
+        stages {
+        
+        stage('Debug') { // Add this debugging stage
             steps {
                 sh 'docker run -it --rm public.ecr.aws/docker/library/maven:3.9-sapmachine /bin/bash'
             }
-        }
-    
-    stages {
+        }    
+        
         stage('Source') {
             steps {
                 sh 'mvn --version'
